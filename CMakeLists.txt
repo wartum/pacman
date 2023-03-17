@@ -2,6 +2,7 @@ project(pacman)
 
 Set(SOURCES
     src/pacman.c
+    src/display.c
     )
 
 add_executable(pacman ${SOURCES})
