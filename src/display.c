@@ -21,12 +21,14 @@ uint8_t Display_initialize(const char* title) {
         printf("Could not create window. %s\n", SDL_GetError());
         return 0;
     }
+    display.fps_counter = 0;
     return 1;
 }
 
 void Display_cleanup() {
     SDL_DestroyWindow(display.window);
     display.window = NULL;
+    display.fps_counter = 0;
     display.map = NULL;
     display.map_w = 0;
     display.map_h = 0;
@@ -42,13 +44,14 @@ void Display_register_map(Tile *map, uint32_t width, uint32_t height, uint32_t t
     display.map_h = height;
     int origin_x = (SCREEN_W / 2) - ((tile_size * display.map_w) / 2);
     int origin_y = (SCREEN_H / 2) - ((tile_size * display.map_h) / 2);
+    Tile *tile = display.map;
     for (uint32_t i = 0; i < display.map_w; i++) {
         for (uint32_t j = 0; j < display.map_h; j++) {
-            Tile *tile = get_tile(i, j);
             tile->rectangle.w = tile_size - 5;
             tile->rectangle.h = tile_size - 5;
             tile->rectangle.x = (tile_size * i) + origin_x;
             tile->rectangle.y = (tile_size * j) + origin_y;
+            tile += 1;
         }
     }
 }

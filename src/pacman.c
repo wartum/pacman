@@ -9,6 +9,7 @@
 
 Tile *map = NULL;
 
+//TODO load from file
 Tile* load_map(uint32_t width, uint32_t height) {
     Tile* result = (Tile*)malloc(sizeof(Tile) * (width * height));
     for (uint32_t i = 0; i < width; i++) {
