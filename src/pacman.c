@@ -100,10 +100,12 @@ void main_loop() {
         if (next_action_countdown <= SDL_GetTicks()) {
             next_action_countdown = SDL_GetTicks() + 20;
             player->y += 1;
-            enemies->y += 1;
-            (enemies + 1)->y -= 1;
-            (enemies + 2)->y += 1;
-            (enemies + 3)->y -= 1;
+            for (uint32_t i = 0; i < 4; i++) {
+                (enemies + i)->x += ((enemies + i)->x < player->x);
+                (enemies + i)->y += ((enemies + i)->y < player->y);
+                (enemies + i)->x -= ((enemies + i)->x > player->x);
+                (enemies + i)->y -= ((enemies + i)->y > player->y);
+            }
         }
 
         /* Handle display */
