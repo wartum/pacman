@@ -8,6 +8,8 @@
 uint8_t Display_initialize(const char* title);
 void Display_cleanup();
 void Display_register_map(Tile *map, uint32_t width, uint32_t height, uint32_t tile_size);
+void Display_register_player(Character* player);
+void Display_register_enemies(Character* enemies, uint32_t n);
 void Display_draw_frame();
 
 #endif

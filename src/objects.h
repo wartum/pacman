@@ -3,7 +3,11 @@
 
 typedef struct {
     uint8_t traversable;
-    SDL_Rect rectangle;
 } Tile;
+
+typedef struct {
+    int x;
+    int y;
+} Character;
 
 #endif

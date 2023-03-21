@@ -10,10 +10,14 @@ typedef struct {
     uint8_t fps_counter;
     SDL_Window *window;
     Tile *map;
-    uint32_t map_w, map_h;
+    uint32_t map_w, map_h, tile_size;
+    Character* player;
+    Character* enemies;
+    uint32_t enemies_n;
 } Display;
 
 Display display;
+SDL_Rect buff_rect;
 
 uint8_t Display_initialize(const char* title) {
     display.window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_W, SCREEN_H, SDL_WINDOW_FULLSCREEN_DESKTOP);
@@ -38,22 +42,37 @@ Tile* get_tile(uint16_t x, uint16_t y) {
     return display.map + (x * display.map_h) + y;
 }
 
+void coord_to_rect(int x, int y) {
+    int origin_x = (SCREEN_W / 2) - ((display.tile_size * display.map_w) / 2);
+    int origin_y = (SCREEN_H / 2) - ((display.tile_size * display.map_h) / 2);
+    buff_rect.x = ((x * display.tile_size) + origin_x);
+    buff_rect.y = ((y * display.tile_size) + origin_y);
+}
+
 void Display_register_map(Tile *map, uint32_t width, uint32_t height, uint32_t tile_size) {
     display.map = map;
     display.map_w = width;
     display.map_h = height;
+    display.tile_size = tile_size;
     int origin_x = (SCREEN_W / 2) - ((tile_size * display.map_w) / 2);
     int origin_y = (SCREEN_H / 2) - ((tile_size * display.map_h) / 2);
     Tile *tile = display.map;
     for (uint32_t i = 0; i < display.map_w; i++) {
         for (uint32_t j = 0; j < display.map_h; j++) {
-            tile->rectangle.w = tile_size - 5;
-            tile->rectangle.h = tile_size - 5;
-            tile->rectangle.x = (tile_size * i) + origin_x;
-            tile->rectangle.y = (tile_size * j) + origin_y;
             tile += 1;
         }
     }
+    buff_rect.w = tile_size - 5;
+    buff_rect.h = tile_size - 5;
+}
+
+void Display_register_player(Character* player) {
+    display.player = player;
+}
+
+void Display_register_enemies(Character* enemies, uint32_t n) {
+    display.enemies = enemies;
+    display.enemies_n = n;
 }
 
 void draw_map() {
@@ -63,13 +82,23 @@ void draw_map() {
     
     for (uint32_t i = 0; i < display.map_w; i++) {
         for (uint32_t j = 0; j < display.map_h; j++) {
+            coord_to_rect(i, j);
             if (get_tile(i, j)->traversable) {
-                    SDL_FillRect(surface, &get_tile(i, j)->rectangle, SDL_MapRGB(surface->format, 50, 160, 0));
+                SDL_FillRect(surface, &buff_rect, SDL_MapRGB(surface->format, 50, 160, 0));
             } else {
-                    SDL_FillRect(surface, &get_tile(i, j)->rectangle, SDL_MapRGB(surface->format, 80, 80, 220));
+                SDL_FillRect(surface, &buff_rect, SDL_MapRGB(surface->format, 80, 80, 220));
             }
         }
     }
+
+    for (uint32_t i = 0; i < display.enemies_n; i++) {
+        coord_to_rect((display.enemies + i)->x, (display.enemies + i)->y);
+        SDL_FillRect(surface, &buff_rect, SDL_MapRGB(surface->format, 255, 0, 255));
+    }
+
+    coord_to_rect(display.player->x, display.player->y);
+    SDL_FillRect(surface, &buff_rect, SDL_MapRGB(surface->format, 255, 255, 0));
+
 }
 
 void calculate_fps() {
