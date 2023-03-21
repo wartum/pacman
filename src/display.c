@@ -68,11 +68,19 @@ void Display_register_map(Tile *map, uint32_t width, uint32_t height, uint32_t t
 
 void Display_register_player(Character* player) {
     display.player = player;
+    coord_to_rect(player->x, player->y);
+    player->x = buff_rect.x;
+    player->y = buff_rect.y;
 }
 
 void Display_register_enemies(Character* enemies, uint32_t n) {
     display.enemies = enemies;
     display.enemies_n = n;
+    for (uint32_t i = 0; i < n; i++) {
+        coord_to_rect((enemies + i)->x, (enemies + i)->y);
+        (enemies + i)->x = buff_rect.x;
+        (enemies + i)->y = buff_rect.y;
+    }
 }
 
 void draw_map() {
@@ -92,11 +100,13 @@ void draw_map() {
     }
 
     for (uint32_t i = 0; i < display.enemies_n; i++) {
-        coord_to_rect((display.enemies + i)->x, (display.enemies + i)->y);
+        buff_rect.x = (display.enemies + i)->x;
+        buff_rect.y = (display.enemies + i)->y;
         SDL_FillRect(surface, &buff_rect, SDL_MapRGB(surface->format, 255, 0, 255));
     }
 
-    coord_to_rect(display.player->x, display.player->y);
+    buff_rect.x = display.player->x;
+    buff_rect.y = display.player->y;
     SDL_FillRect(surface, &buff_rect, SDL_MapRGB(surface->format, 255, 255, 0));
 
 }

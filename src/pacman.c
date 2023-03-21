@@ -10,6 +10,7 @@
 Tile *map = NULL;
 Character* player = NULL;
 Character* enemies = NULL;
+uint32_t next_action_countdown = 0;
 
 //TODO load from file
 Tile* load_map(uint32_t width, uint32_t height) {
@@ -96,6 +97,14 @@ void main_loop() {
         }
 
         /* Handle physics */
+        if (next_action_countdown <= SDL_GetTicks()) {
+            next_action_countdown = SDL_GetTicks() + 20;
+            player->y += 1;
+            enemies->y += 1;
+            (enemies + 1)->y -= 1;
+            (enemies + 2)->y += 1;
+            (enemies + 3)->y -= 1;
+        }
 
         /* Handle display */
         Display_draw_frame();
