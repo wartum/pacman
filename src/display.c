@@ -1,10 +1,6 @@
 #include <stdio.h>
-
+#include "constants.h"
 #include "display.h"
-
-#define SCREEN_W 1920
-#define SCREEN_H 1080
-#define FPS_CAP 32
 
 typedef struct {
     uint8_t fps_counter;
@@ -49,21 +45,21 @@ void coord_to_rect(int x, int y) {
     buff_rect.y = ((y * display.tile_size) + origin_y);
 }
 
-void Display_register_map(Tile *map, uint32_t width, uint32_t height, uint32_t tile_size) {
+void Display_register_map(Tile *map) {
     display.map = map;
-    display.map_w = width;
-    display.map_h = height;
-    display.tile_size = tile_size;
-    int origin_x = (SCREEN_W / 2) - ((tile_size * display.map_w) / 2);
-    int origin_y = (SCREEN_H / 2) - ((tile_size * display.map_h) / 2);
+    display.map_w = MAP_W;
+    display.map_h = MAP_H;
+    display.tile_size = TILE_SIZE;
+    int origin_x = (SCREEN_W / 2) - ((TILE_SIZE * display.map_w) / 2);
+    int origin_y = (SCREEN_H / 2) - ((TILE_SIZE * display.map_h) / 2);
     Tile *tile = display.map;
     for (uint32_t i = 0; i < display.map_w; i++) {
         for (uint32_t j = 0; j < display.map_h; j++) {
             tile += 1;
         }
     }
-    buff_rect.w = tile_size - 5;
-    buff_rect.h = tile_size - 5;
+    buff_rect.w = TILE_SIZE - 5;
+    buff_rect.h = TILE_SIZE - 5;
 }
 
 void Display_register_player(Character* player) {
@@ -135,5 +131,5 @@ void Display_draw_frame() {
         }
         display.fps_counter += 1;
     }
-    calculate_fps();
+    //calculate_fps();
 }

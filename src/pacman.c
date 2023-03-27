@@ -1,16 +1,15 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 
+#include "constants.h"
 #include "objects.h"
+#include "collision.h"
 #include "display.h"
-
-#define MAP_W 35
-#define MAP_H 20
 
 Tile *map = NULL;
 Character* player = NULL;
 Character* enemies = NULL;
-uint32_t next_action_countdown = 0;
+uint32_t turn_countdown = 0;
 
 //TODO load from file
 Tile* load_map(uint32_t width, uint32_t height) {
@@ -51,6 +50,94 @@ Character* spawn_enemies() {
     return result;
 }
 
+void handle_keyboard_input(SDL_Keycode keycode) {
+    switch(keycode) {
+    case SDLK_RIGHT:
+        player->next_direction = RIGHT;
+        break;
+    case SDLK_LEFT:
+        player->next_direction = LEFT;
+        break;
+    case SDLK_UP:
+        player->next_direction = UP;
+        break;
+    case SDLK_DOWN:
+        player->next_direction = DOWN;
+        break;
+    default:
+        break;
+    }
+}
+
+Direction chase(Character* chaser, Character* chased) {
+    if (chaser->x > chased->x + 100 ) {
+        return LEFT;
+    }
+
+    if (chaser->x < chased->x - 100 ) {
+        return RIGHT;
+    }
+
+    if (chaser->y > chased->y + 100 ) {
+        return UP;
+    }
+
+    if (chaser->y > chased->y - 100 ) {
+        return DOWN;
+    }
+}
+
+void handle_movement() {
+    if (turn_countdown <= SDL_GetTicks()) {
+        turn_countdown = SDL_GetTicks() + 20;
+        
+        // Player
+        if (can_switch_direction(player)) {
+            player->current_direction = player->next_direction;
+        }
+
+        switch(player->current_direction) {
+            case RIGHT:
+                player->x += !collide(player) * PIXEL_PER_TURN;
+                break;
+            case LEFT:
+                player->x -= !collide(player) * PIXEL_PER_TURN;
+                break;
+            case UP:
+                player->y -= !collide(player) * PIXEL_PER_TURN;
+                break;
+            case DOWN:
+                player->y += !collide(player) * PIXEL_PER_TURN;
+                break;
+        }
+
+        // Enemies
+        for (uint32_t i = 0; i < 4; i++) {
+            Character* enemy = (enemies + i);
+            enemy->next_direction = chase(enemy, player);
+
+            if (can_switch_direction(enemy)) {
+                enemy->current_direction = enemy->next_direction;
+            }
+
+            switch(enemy->current_direction) {
+                case RIGHT:
+                    enemy->x += !collide(enemy) * PIXEL_PER_TURN;
+                    break;
+                case LEFT:
+                    enemy->x -= !collide(enemy) * PIXEL_PER_TURN;
+                    break;
+                case UP:
+                    enemy->y -= !collide(enemy) * PIXEL_PER_TURN;
+                    break;
+                case DOWN:
+                    enemy->y += !collide(enemy) * PIXEL_PER_TURN;
+                    break;
+            }
+        }
+    }
+}
+
 uint8_t initialize() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("Could not initialize SDL. %s\n", SDL_GetError());
@@ -64,7 +151,7 @@ uint8_t initialize() {
     map = load_map(MAP_W, MAP_H);
     player = spawn_player();
     enemies = spawn_enemies();
-    Display_register_map(map, MAP_W, MAP_H, 50);
+    Display_register_map(map);
     Display_register_player(player);
     Display_register_enemies(enemies, 4);
     return 1;
@@ -92,21 +179,13 @@ void main_loop() {
                     quit_game = 1;
                     break;
                 case SDL_KEYDOWN:
+                    handle_keyboard_input(e.key.keysym.sym);
                     break;
             }
         }
 
         /* Handle physics */
-        if (next_action_countdown <= SDL_GetTicks()) {
-            next_action_countdown = SDL_GetTicks() + 20;
-            player->y += 1;
-            for (uint32_t i = 0; i < 4; i++) {
-                (enemies + i)->x += ((enemies + i)->x < player->x);
-                (enemies + i)->y += ((enemies + i)->y < player->y);
-                (enemies + i)->x -= ((enemies + i)->x > player->x);
-                (enemies + i)->y -= ((enemies + i)->y > player->y);
-            }
-        }
+        handle_movement();
 
         /* Handle display */
         Display_draw_frame();
