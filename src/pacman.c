@@ -17,7 +17,7 @@ Tile* load_map(uint32_t width, uint32_t height) {
     for (uint32_t i = 0; i < width; i++) {
         for (uint32_t j = 0; j < height; j++) {
             Tile *tile = (result + (i * height) + j);
-            if (j == 2 || i == 2) {
+            if (j == 2 || i == 2 || j == 15 || i == 30) {
                 tile->traversable = 0;
             } else {
                 tile->traversable = 1;
@@ -98,16 +98,16 @@ void handle_movement() {
 
         switch(player->current_direction) {
             case RIGHT:
-                player->x += !collide(player) * PIXEL_PER_TURN;
+                player->x += !collide(player, map) * PIXEL_PER_TURN;
                 break;
             case LEFT:
-                player->x -= !collide(player) * PIXEL_PER_TURN;
+                player->x -= !collide(player, map) * PIXEL_PER_TURN;
                 break;
             case UP:
-                player->y -= !collide(player) * PIXEL_PER_TURN;
+                player->y -= !collide(player, map) * PIXEL_PER_TURN;
                 break;
             case DOWN:
-                player->y += !collide(player) * PIXEL_PER_TURN;
+                player->y += !collide(player, map) * PIXEL_PER_TURN;
                 break;
         }
 
@@ -122,16 +122,16 @@ void handle_movement() {
 
             switch(enemy->current_direction) {
                 case RIGHT:
-                    enemy->x += !collide(enemy) * PIXEL_PER_TURN;
+                    enemy->x += !collide(enemy, map) * PIXEL_PER_TURN;
                     break;
                 case LEFT:
-                    enemy->x -= !collide(enemy) * PIXEL_PER_TURN;
+                    enemy->x -= !collide(enemy, map) * PIXEL_PER_TURN;
                     break;
                 case UP:
-                    enemy->y -= !collide(enemy) * PIXEL_PER_TURN;
+                    enemy->y -= !collide(enemy, map) * PIXEL_PER_TURN;
                     break;
                 case DOWN:
-                    enemy->y += !collide(enemy) * PIXEL_PER_TURN;
+                    enemy->y += !collide(enemy, map) * PIXEL_PER_TURN;
                     break;
             }
         }

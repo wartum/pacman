@@ -5,6 +5,6 @@
 #include "objects.h"
 
 uint8_t can_switch_direction(Character* character);
-uint8_t collide(Character* character);
+uint8_t collide(Character* character, Tile* map);
 
 #endif
